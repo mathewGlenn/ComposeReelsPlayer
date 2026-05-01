@@ -46,7 +46,7 @@ Add the library dependency to your app module:
 
 ```kotlin
 dependencies {
-    implementation("com.github.mathewGlenn.ComposeReelsPlayer:compose-reels-player:v0.1.0")
+    implementation("com.github.mathewGlenn:ComposeReelsPlayer:v0.1.0")
 }
 ```
 
