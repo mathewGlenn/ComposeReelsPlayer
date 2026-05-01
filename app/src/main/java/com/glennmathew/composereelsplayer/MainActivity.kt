@@ -31,7 +31,7 @@ private fun SampleReelsScreen() {
         items = sampleReels,
         controller = controller,
         config = ReelsPlayerConfig(
-            muteConfig = ReelsMuteConfig(initiallyMuted = true),
+            muteConfig = ReelsMuteConfig(initiallyMuted = false),
             preloadConfig = ReelsPreloadConfig(
                 enabled = true,
                 aheadCount = 3,
