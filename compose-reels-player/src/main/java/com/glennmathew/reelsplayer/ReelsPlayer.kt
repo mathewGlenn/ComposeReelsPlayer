@@ -97,6 +97,7 @@ fun ReelsPlayer(
     var previousIndex by remember { mutableStateOf<Int?>(null) }
     var lastLoadMoreIndex by remember { mutableStateOf<Int?>(null) }
     var shouldResumeAfterLifecyclePause by remember { mutableStateOf(false) }
+    var pausedByDragging by remember { mutableStateOf(false) }
     var bufferingStartedAt by remember { mutableLongStateOf(0L) }
 
     val actions = remember(controller) {
@@ -123,13 +124,20 @@ fun ReelsPlayer(
 
     LaunchedEffect(manager) {
         manager.state.collectLatest { nextState ->
-            controller.updateState(nextState)
-            onPlaybackStateChanged(nextState)
+            if (nextState.isPlaying) {
+                pausedByDragging = false
+            }
+            val decoratedState = nextState.copy(
+                isDragging = pagerState.isScrollInProgress,
+                isPausedByDragging = pausedByDragging && !nextState.isPlaying
+            )
+            controller.updateState(decoratedState)
+            onPlaybackStateChanged(decoratedState)
         }
     }
 
-    LaunchedEffect(items, pagerState.currentPage) {
-        val currentIndex = pagerState.currentPage.coerceIn(0, (items.size - 1).coerceAtLeast(0))
+    LaunchedEffect(items, pagerState.settledPage) {
+        val currentIndex = pagerState.settledPage.coerceIn(0, (items.size - 1).coerceAtLeast(0))
         val item = items.getOrNull(currentIndex)
         if (item == null) {
             controller.updateState(ReelsPlayerState())
@@ -156,9 +164,30 @@ fun ReelsPlayer(
     LaunchedEffect(pagerState, config.pauseWhenDragging, config.playWhenPageSettled) {
         snapshotFlow { pagerState.isScrollInProgress }.collectLatest { scrolling ->
             if (scrolling && config.pauseWhenDragging) {
+                pausedByDragging = true
+                controller.updateState(
+                    controller.state.value.copy(
+                        isDragging = true,
+                        isPausedByDragging = true
+                    )
+                )
                 manager.pause()
             } else if (!scrolling && config.playWhenPageSettled && config.autoplay) {
+                controller.updateState(
+                    controller.state.value.copy(
+                        isDragging = false,
+                        isPausedByDragging = pausedByDragging
+                    )
+                )
                 manager.play()
+            } else if (!scrolling) {
+                pausedByDragging = false
+                controller.updateState(
+                    controller.state.value.copy(
+                        isDragging = false,
+                        isPausedByDragging = false
+                    )
+                )
             }
         }
     }
@@ -325,14 +354,16 @@ fun ReelsPlayer(
     VerticalPager(
         state = pagerState,
         modifier = modifier.fillMaxSize(),
+        beyondViewportPageCount = 1,
         key = { page -> "${items[page].id}#$page" }
     ) { page ->
         val item = items[page]
-        val pageState = if (page == state.currentIndex) state else state.copy(currentItem = item)
+        val isActivePage = page == state.currentIndex
         ReelsPage(
             item = item,
-            state = pageState,
-            player = if (page == state.currentIndex) manager.player else null,
+            state = state,
+            isActivePage = isActivePage,
+            player = if (isActivePage) manager.player else null,
             actions = actions,
             config = config,
             modifier = Modifier.reelsGestures(item, actions, config),

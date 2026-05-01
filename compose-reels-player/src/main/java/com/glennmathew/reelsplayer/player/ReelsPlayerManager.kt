@@ -128,9 +128,9 @@ internal class ReelsPlayerManager(
             isMuted = userMuted,
             isLoading = true
         )
+        player.playWhenReady = autoplay
         player.setMediaSource(mediaSourceFactory.createMediaSource(item))
         player.prepare()
-        player.playWhenReady = autoplay
     }
 
     fun play() {

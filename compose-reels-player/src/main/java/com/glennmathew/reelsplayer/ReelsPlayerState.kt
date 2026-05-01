@@ -10,6 +10,8 @@ data class ReelsPlayerState(
     val isPlaying: Boolean = false,
     val isMuted: Boolean = true,
     val isBuffering: Boolean = false,
+    val isDragging: Boolean = false,
+    val isPausedByDragging: Boolean = false,
     val isLoading: Boolean = false,
     val isFirstFrameRendered: Boolean = false,
     val playbackSpeed: Float = 1f,

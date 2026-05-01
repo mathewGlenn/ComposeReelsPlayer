@@ -22,6 +22,7 @@ import com.glennmathew.reelsplayer.model.ReelsPlaybackState
 internal fun ReelsPage(
     item: ReelItem,
     state: ReelsPlayerState,
+    isActivePage: Boolean,
     player: Player?,
     actions: ReelsPlayerActions,
     config: ReelsPlayerConfig,
@@ -31,23 +32,29 @@ internal fun ReelsPage(
     errorContent: @Composable BoxScope.(ReelItem, Throwable?, () -> Unit) -> Unit
 ) {
     Box(modifier.fillMaxSize().background(Color.Black)) {
-        ReelsVideoSurface(
-            player = player,
-            resizeMode = config.resizeMode,
-            modifier = Modifier.fillMaxSize()
-        )
+        if (isActivePage) {
+            ReelsVideoSurface(
+                player = player,
+                resizeMode = config.resizeMode,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            ReelsThumbnail(item = item)
+        }
 
-        if (state.currentItem?.id == item.id && (!state.isFirstFrameRendered || state.isLoading)) {
+        if (isActivePage && (!state.isFirstFrameRendered || state.isLoading)) {
             loadingContent(item)
         }
 
-        if (state.currentItem?.id == item.id && state.playbackState is ReelsPlaybackState.Error) {
+        if (isActivePage && state.playbackState is ReelsPlaybackState.Error) {
             errorContent(item, state.error, actions::retry)
         }
 
-        overlay(item, state, actions)
+        if (isActivePage) {
+            overlay(item, state, actions)
+        }
 
-        if (config.showProgressBar) {
+        if (isActivePage && config.showProgressBar) {
             ReelsProgressBar(
                 progress = state.progress,
                 modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
