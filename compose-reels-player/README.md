@@ -4,6 +4,31 @@
 
 ## Installation
 
+### From JitPack
+
+Add JitPack to the consuming project's `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://jitpack.io")
+    }
+}
+```
+
+Then add the dependency:
+
+```kotlin
+dependencies {
+    implementation("com.github.mathewGlenn.ComposeReelsPlayer:compose-reels-player:v0.1.0")
+}
+```
+
+### Local Module
+
 Add the module to your app:
 
 ```kotlin

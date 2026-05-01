@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    id("maven-publish")
 }
 
 android {
@@ -18,6 +19,12 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
     }
 
     compileOptions {
@@ -48,4 +55,44 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            groupId = providers.gradleProperty("GROUP").get()
+            artifactId = providers.gradleProperty("POM_ARTIFACT_ID").get()
+            version = providers.gradleProperty("VERSION_NAME").get()
+
+            afterEvaluate {
+                from(components["release"])
+            }
+
+            pom {
+                name.set("Compose Reels Player")
+                description.set("A Jetpack Compose reels-style video player built with Media3 ExoPlayer.")
+                url.set("https://github.com/mathewGlenn/ComposeReelsPlayer")
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("mathewGlenn")
+                        name.set("Glenn Mathew")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:git://github.com/mathewGlenn/ComposeReelsPlayer.git")
+                    developerConnection.set("scm:git:ssh://github.com/mathewGlenn/ComposeReelsPlayer.git")
+                    url.set("https://github.com/mathewGlenn/ComposeReelsPlayer")
+                }
+            }
+        }
+    }
 }

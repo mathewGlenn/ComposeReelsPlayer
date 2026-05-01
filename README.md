@@ -38,7 +38,42 @@ The library declares its Compose, Lifecycle, Coil, and Media3 dependencies throu
 
 ## Installation
 
-For this repository, add the local module to your app:
+### From JitPack
+
+After this repository is pushed to GitHub and tagged, other projects can install the library through JitPack.
+
+Add JitPack to the consuming project's `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://jitpack.io")
+    }
+}
+```
+
+Then add the dependency:
+
+```kotlin
+dependencies {
+    implementation("com.github.mathewGlenn.ComposeReelsPlayer:compose-reels-player:0.1.0")
+}
+```
+
+For a Git tag named `v0.1.0`, use:
+
+```kotlin
+dependencies {
+    implementation("com.github.mathewGlenn.ComposeReelsPlayer:compose-reels-player:v0.1.0")
+}
+```
+
+### From This Repository
+
+For local development in this repository, add the module to your app:
 
 ```kotlin
 dependencies {
@@ -53,8 +88,6 @@ include(":compose-reels-player")
 ```
 
 Then add the dependency from your app module.
-
-> Maven or JitPack coordinates are not configured in this repository yet.
 
 ## Permissions
 
@@ -263,6 +296,25 @@ Or open the project in Android Studio and run the `app` configuration.
 .\gradlew.bat :compose-reels-player:assemble
 .\gradlew.bat :compose-reels-player:test
 ```
+
+## Publish
+
+This project is configured with Gradle `maven-publish` for the `compose-reels-player` release variant.
+
+Publish to your local Maven cache:
+
+```powershell
+.\gradlew.bat :compose-reels-player:publishToMavenLocal
+```
+
+Create and push a GitHub release tag for JitPack:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Then open [JitPack for ComposeReelsPlayer](https://jitpack.io/#mathewGlenn/ComposeReelsPlayer) and request the `v0.1.0` build.
 
 ## Notes
 
