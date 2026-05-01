@@ -36,6 +36,7 @@ import com.glennmathew.reelsplayer.config.ReelsPlayerConfig
 import com.glennmathew.reelsplayer.model.ReelItem
 import com.glennmathew.reelsplayer.model.ReelsAnalyticsEvent
 import com.glennmathew.reelsplayer.model.ReelsMediaSource
+import com.glennmathew.reelsplayer.model.ReelsPlaybackState
 import com.glennmathew.reelsplayer.model.ReelsRepeatMode
 import com.glennmathew.reelsplayer.model.toReelItem
 import com.glennmathew.reelsplayer.model.toReelsMediaSource
@@ -44,7 +45,6 @@ import com.glennmathew.reelsplayer.player.ReelsPlayerManager
 import com.glennmathew.reelsplayer.player.ReelsPreloader
 import com.glennmathew.reelsplayer.ui.DefaultErrorContent
 import com.glennmathew.reelsplayer.ui.DefaultLoadingContent
-import com.glennmathew.reelsplayer.ui.DefaultReelsOverlay
 import com.glennmathew.reelsplayer.ui.ReelsPage
 import com.glennmathew.reelsplayer.util.ReelsLifecycleObserver
 import kotlinx.coroutines.delay
@@ -64,9 +64,7 @@ fun ReelsPlayer(
         item: ReelItem,
         state: ReelsPlayerState,
         actions: ReelsPlayerActions
-    ) -> Unit = { item, state, actions ->
-        DefaultReelsOverlay(item = item, state = state, actions = actions)
-    },
+    ) -> Unit = { _, _, _ -> },
     loadingContent: @Composable BoxScope.(item: ReelItem) -> Unit = { item ->
         DefaultLoadingContent(item = item)
     },
@@ -113,9 +111,7 @@ fun <T> ReelsPlayer(
         item: T,
         state: ReelsPlayerState,
         actions: ReelsPlayerActions
-    ) -> Unit = { item, state, actions ->
-        DefaultReelsOverlay(item = mediaSource(item).toReelItem(), state = state, actions = actions)
-    },
+    ) -> Unit = { _, _, _ -> },
     loadingContent: @Composable BoxScope.(item: T) -> Unit = { item ->
         DefaultLoadingContent(item = mediaSource(item).toReelItem())
     },
@@ -414,11 +410,32 @@ fun <T> ReelsPlayer(
         val item = items[page]
         val mediaItem = mediaItems[page]
         val isActivePage = page == state.currentIndex
+        val showOverlay = isActivePage || page == pagerState.currentPage
+        val pageState = if (isActivePage) {
+            state
+        } else {
+            state.copy(
+                currentIndex = page,
+                currentItem = mediaItem,
+                playbackState = ReelsPlaybackState.Idle,
+                isPlaying = false,
+                isBuffering = false,
+                isPausedByDragging = false,
+                isLoading = false,
+                isFirstFrameRendered = false,
+                playbackSpeed = 1f,
+                currentPositionMs = 0L,
+                durationMs = 0L,
+                progress = 0f,
+                error = null
+            )
+        }
         ReelsPage(
             item = item,
             reelItem = mediaItem,
-            state = state,
+            state = pageState,
             isActivePage = isActivePage,
+            showOverlay = showOverlay,
             player = if (isActivePage) manager.player else null,
             actions = actions,
             config = config,

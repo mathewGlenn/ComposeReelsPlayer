@@ -24,6 +24,7 @@ internal fun <T> ReelsPage(
     reelItem: ReelItem,
     state: ReelsPlayerState,
     isActivePage: Boolean,
+    showOverlay: Boolean,
     player: Player?,
     actions: ReelsPlayerActions,
     config: ReelsPlayerConfig,
@@ -51,8 +52,16 @@ internal fun <T> ReelsPage(
             errorContent(item, state.error, actions::retry)
         }
 
-        if (isActivePage) {
+        if (showOverlay) {
             overlay(item, state, actions)
+        }
+
+        if (isActivePage && config.showPlaybackControls) {
+            DefaultReelsOverlay(
+                item = reelItem,
+                state = state,
+                actions = actions
+            )
         }
 
         if (isActivePage && config.showProgressBar) {

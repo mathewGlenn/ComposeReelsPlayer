@@ -11,6 +11,7 @@ data class ReelsPlayerConfig(
     val resizeMode: ReelsResizeMode = ReelsResizeMode.Crop,
     val repeatMode: ReelsRepeatMode = ReelsRepeatMode.One,
     val showProgressBar: Boolean = true,
+    val showPlaybackControls: Boolean = true,
     val autoplay: Boolean = true,
     val pauseWhenDragging: Boolean = true,
     val playWhenPageSettled: Boolean = true,

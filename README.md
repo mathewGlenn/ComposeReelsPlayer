@@ -46,7 +46,7 @@ Add the library dependency to your app module:
 
 ```kotlin
 dependencies {
-    implementation("com.github.mathewGlenn:ComposeReelsPlayer:v0.1.0")
+    implementation("com.github.mathewGlenn:ComposeReelsPlayer:v0.1.2")
 }
 ```
 
@@ -102,7 +102,7 @@ fun ReelsScreen() {
 
 ## Custom Overlay
 
-Use the `overlay` slot for app-specific UI. The library intentionally does not own social actions, profile navigation, comments, backend writes, or database logic.
+Use the `overlay` slot for app-specific UI. The library intentionally does not own social actions, profile navigation, comments, backend writes, or database logic. Playback affordances such as the paused play button, mute button, fast-forward indicator, and progress bar stay library-owned by default, even when you provide a custom overlay.
 
 ```kotlin
 ReelsPlayer(
@@ -177,6 +177,7 @@ ReelsPlayer(
     config = ReelsPlayerConfig(
         autoplay = true,
         showProgressBar = true,
+        showPlaybackControls = true,
         loadMoreThreshold = 3,
         muteConfig = ReelsMuteConfig(initiallyMuted = true),
         preloadConfig = ReelsPreloadConfig(
@@ -279,7 +280,7 @@ Media3-supported sources are supported, including MP4, HLS `.m3u8`, and DASH `.m
 
 ## Notes
 
-- The default overlay is intentionally minimal. Replace it with your product UI for likes, comments, sharing, captions, profile actions, and moderation states.
+- The custom overlay slot is intentionally for product UI such as likes, comments, sharing, captions, profile actions, and moderation states. Set `showPlaybackControls = false` only if the host app wants to replace the library-owned paused, mute, and fast-forward indicators too.
 - Preloading keeps a bounded set of muted prepared players nearby. Avoid large `aheadCount` or `behindCount` values on memory-constrained devices.
 - `ReelItem.headers` and `ReelsMediaSource.Video.headers` are passed into media requests, which is useful for authenticated or signed media endpoints.
 - Subtitle metadata is modeled with `ReelSubtitle`, but subtitle styling and selection UI are left to the host app.

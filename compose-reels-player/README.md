@@ -21,7 +21,7 @@ Add the library dependency to your app module:
 
 ```kotlin
 dependencies {
-    implementation("com.github.mathewGlenn:ComposeReelsPlayer:v0.1.0")
+    implementation("com.github.mathewGlenn:ComposeReelsPlayer:v0.1.2")
 }
 ```
 
@@ -82,7 +82,7 @@ ReelsPlayer(
 )
 ```
 
-The library never owns like, comment, follow, profile, backend, or database logic. Put app-specific UI in the overlay.
+The library never owns like, comment, follow, profile, backend, or database logic. Put app-specific UI in the overlay. Playback affordances such as the paused play button, mute button, fast-forward indicator, and progress bar stay library-owned by default, even when you provide a custom overlay.
 
 ## Gesture Customization
 
@@ -101,6 +101,8 @@ ReelsPlayer(
 ```
 
 Single tap toggles play/pause by default. Long press temporarily changes speed to `longPressPlaybackSpeed` and restores `1f` on release unless disabled.
+
+Set `showPlaybackControls = false` only if the host app wants to replace the library-owned paused, mute, and fast-forward indicators too.
 
 ## Mute And Controller
 
@@ -178,4 +180,4 @@ Media3-supported sources are supported, including MP4, HLS `.m3u8`, and DASH `.m
 
 ## Limitations
 
-Captions are modeled through `ReelSubtitle`, but styling and caption selection UI are left to the host app. The default overlay is intentionally minimal and should be replaced for app-specific social actions.
+Captions are modeled through `ReelSubtitle`, but styling and caption selection UI are left to the host app. The custom overlay slot is intentionally for app-specific social actions.
