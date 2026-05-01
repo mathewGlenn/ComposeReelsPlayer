@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+/compose-reels-player/build
+/agent/instructions

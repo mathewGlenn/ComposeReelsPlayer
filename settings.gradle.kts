@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ComposeReelsPlayer"
 include(":app")
+include(":compose-reels-player")
  
