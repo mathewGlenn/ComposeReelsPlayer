@@ -35,7 +35,10 @@ import androidx.media3.common.util.UnstableApi
 import com.glennmathew.reelsplayer.config.ReelsPlayerConfig
 import com.glennmathew.reelsplayer.model.ReelItem
 import com.glennmathew.reelsplayer.model.ReelsAnalyticsEvent
+import com.glennmathew.reelsplayer.model.ReelsMediaSource
 import com.glennmathew.reelsplayer.model.ReelsRepeatMode
+import com.glennmathew.reelsplayer.model.toReelItem
+import com.glennmathew.reelsplayer.model.toReelsMediaSource
 import com.glennmathew.reelsplayer.player.ReelsPlaybackTracker
 import com.glennmathew.reelsplayer.player.ReelsPlayerManager
 import com.glennmathew.reelsplayer.player.ReelsPreloader
@@ -79,11 +82,61 @@ fun ReelsPlayer(
     onAnalyticsEvent: (event: ReelsAnalyticsEvent) -> Unit = {},
     onLoadMore: () -> Unit = {}
 ) {
+    ReelsPlayer(
+        items = items,
+        mediaSource = { it.toReelsMediaSource() },
+        modifier = modifier,
+        controller = controller,
+        initialIndex = initialIndex,
+        config = config,
+        overlay = overlay,
+        loadingContent = loadingContent,
+        errorContent = errorContent,
+        onCurrentReelChanged = onCurrentReelChanged,
+        onPlaybackStateChanged = onPlaybackStateChanged,
+        onAnalyticsEvent = onAnalyticsEvent,
+        onLoadMore = onLoadMore
+    )
+}
+
+@Composable
+@OptIn(UnstableApi::class)
+@kotlin.OptIn(ExperimentalFoundationApi::class)
+fun <T> ReelsPlayer(
+    items: List<T>,
+    mediaSource: (T) -> ReelsMediaSource,
+    modifier: Modifier = Modifier,
+    controller: ReelsPlayerController = rememberReelsPlayerController(),
+    initialIndex: Int = 0,
+    config: ReelsPlayerConfig = ReelsPlayerConfig(),
+    overlay: @Composable BoxScope.(
+        item: T,
+        state: ReelsPlayerState,
+        actions: ReelsPlayerActions
+    ) -> Unit = { item, state, actions ->
+        DefaultReelsOverlay(item = mediaSource(item).toReelItem(), state = state, actions = actions)
+    },
+    loadingContent: @Composable BoxScope.(item: T) -> Unit = { item ->
+        DefaultLoadingContent(item = mediaSource(item).toReelItem())
+    },
+    errorContent: @Composable BoxScope.(
+        item: T,
+        error: Throwable?,
+        retry: () -> Unit
+    ) -> Unit = { item, error, retry ->
+        DefaultErrorContent(item = mediaSource(item).toReelItem(), error = error, onRetry = retry)
+    },
+    onCurrentReelChanged: (index: Int, item: T) -> Unit = { _, _ -> },
+    onPlaybackStateChanged: (state: ReelsPlayerState) -> Unit = {},
+    onAnalyticsEvent: (event: ReelsAnalyticsEvent) -> Unit = {},
+    onLoadMore: () -> Unit = {}
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
-    val safeInitialIndex = initialIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
-    val pagerState = rememberPagerState(initialPage = safeInitialIndex) { items.size }
+    val mediaItems = items.map { mediaSource(it).toReelItem() }
+    val safeInitialIndex = initialIndex.coerceIn(0, (mediaItems.size - 1).coerceAtLeast(0))
+    val pagerState = rememberPagerState(initialPage = safeInitialIndex) { mediaItems.size }
     val manager = remember {
         ReelsPlayerManager(context.applicationContext, config)
     }
@@ -136,26 +189,27 @@ fun ReelsPlayer(
         }
     }
 
-    LaunchedEffect(items, pagerState.settledPage) {
-        val currentIndex = pagerState.settledPage.coerceIn(0, (items.size - 1).coerceAtLeast(0))
+    LaunchedEffect(items, mediaItems, pagerState.settledPage) {
+        val currentIndex = pagerState.settledPage.coerceIn(0, (mediaItems.size - 1).coerceAtLeast(0))
         val item = items.getOrNull(currentIndex)
-        if (item == null) {
+        val mediaItem = mediaItems.getOrNull(currentIndex)
+        if (item == null || mediaItem == null) {
             controller.updateState(ReelsPlayerState())
             return@LaunchedEffect
         }
-        if (lastLoadedId != item.id) {
+        if (lastLoadedId != mediaItem.id) {
             previousIndex?.takeIf { it != currentIndex }?.let { from ->
-                onAnalyticsEvent(ReelsAnalyticsEvent.VideoSkipped(item, from, currentIndex))
+                onAnalyticsEvent(ReelsAnalyticsEvent.VideoSkipped(mediaItem, from, currentIndex))
             }
             previousIndex = currentIndex
-            lastLoadedId = item.id
+            lastLoadedId = mediaItem.id
             tracker.reset()
-            manager.load(currentIndex, item, config.autoplay && !pagerState.isScrollInProgress)
+            manager.load(currentIndex, mediaItem, config.autoplay && !pagerState.isScrollInProgress)
             onCurrentReelChanged(currentIndex, item)
-            onAnalyticsEvent(ReelsAnalyticsEvent.ReelImpression(item, currentIndex))
+            onAnalyticsEvent(ReelsAnalyticsEvent.ReelImpression(mediaItem, currentIndex))
         }
-        preloader.preload(items, currentIndex)
-        if (items.lastIndex - currentIndex <= config.loadMoreThreshold && lastLoadMoreIndex != currentIndex) {
+        preloader.preload(mediaItems, currentIndex)
+        if (mediaItems.lastIndex - currentIndex <= config.loadMoreThreshold && lastLoadMoreIndex != currentIndex) {
             lastLoadMoreIndex = currentIndex
             onLoadMore()
         }
@@ -211,7 +265,7 @@ fun ReelsPlayer(
         }
     }
 
-    LaunchedEffect(config.repeatMode, items) {
+    LaunchedEffect(config.repeatMode, mediaItems) {
         manager.onStarted = {
             controller.state.value.currentItem?.let {
                 onAnalyticsEvent(ReelsAnalyticsEvent.VideoStarted(it, controller.state.value.currentIndex))
@@ -257,7 +311,7 @@ fun ReelsPlayer(
                 onAnalyticsEvent(ReelsAnalyticsEvent.VideoCompleted(it, current.currentIndex))
             }
             if (config.repeatMode == ReelsRepeatMode.All) {
-                val next = if (current.currentIndex >= items.lastIndex) 0 else current.currentIndex + 1
+                val next = if (current.currentIndex >= mediaItems.lastIndex) 0 else current.currentIndex + 1
                 scope.launch { pagerState.animateScrollToPage(next) }
             }
         }
@@ -288,7 +342,7 @@ fun ReelsPlayer(
         }
     }
 
-    LaunchedEffect(controller, items.size) {
+    LaunchedEffect(controller, mediaItems.size) {
         controller.bind(
             play = manager::play,
             pause = manager::pause,
@@ -326,25 +380,25 @@ fun ReelsPlayer(
                 }
             },
             scrollTo = { index ->
-                if (index in items.indices) scope.launch { pagerState.scrollToPage(index) }
+                if (index in mediaItems.indices) scope.launch { pagerState.scrollToPage(index) }
             },
             animateScrollTo = { index ->
-                if (index in items.indices) scope.launch { pagerState.animateScrollToPage(index) }
+                if (index in mediaItems.indices) scope.launch { pagerState.animateScrollToPage(index) }
             },
             next = {
-                val next = (pagerState.currentPage + 1).coerceAtMost(items.lastIndex)
-                if (next in items.indices) scope.launch { pagerState.animateScrollToPage(next) }
+                val next = (pagerState.currentPage + 1).coerceAtMost(mediaItems.lastIndex)
+                if (next in mediaItems.indices) scope.launch { pagerState.animateScrollToPage(next) }
             },
             previous = {
                 val previous = (pagerState.currentPage - 1).coerceAtLeast(0)
-                if (previous in items.indices) scope.launch { pagerState.animateScrollToPage(previous) }
+                if (previous in mediaItems.indices) scope.launch { pagerState.animateScrollToPage(previous) }
             },
             setPlaybackSpeed = manager::setPlaybackSpeed,
             retry = manager::retry
         )
     }
 
-    if (items.isEmpty()) {
+    if (mediaItems.isEmpty()) {
         Box(modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
             Text(text = "No reels", color = Color.White)
         }
@@ -355,18 +409,20 @@ fun ReelsPlayer(
         state = pagerState,
         modifier = modifier.fillMaxSize(),
         beyondViewportPageCount = 1,
-        key = { page -> "${items[page].id}#$page" }
+        key = { page -> "${mediaItems[page].id}#$page" }
     ) { page ->
         val item = items[page]
+        val mediaItem = mediaItems[page]
         val isActivePage = page == state.currentIndex
         ReelsPage(
             item = item,
+            reelItem = mediaItem,
             state = state,
             isActivePage = isActivePage,
             player = if (isActivePage) manager.player else null,
             actions = actions,
             config = config,
-            modifier = Modifier.reelsGestures(item, actions, config),
+            modifier = Modifier.reelsGestures(mediaItem, actions, config),
             overlay = overlay,
             loadingContent = loadingContent,
             errorContent = errorContent

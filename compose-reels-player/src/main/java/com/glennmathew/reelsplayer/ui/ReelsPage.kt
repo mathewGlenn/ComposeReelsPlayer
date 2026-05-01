@@ -19,17 +19,18 @@ import com.glennmathew.reelsplayer.model.ReelsPlaybackState
 
 @Composable
 @UnstableApi
-internal fun ReelsPage(
-    item: ReelItem,
+internal fun <T> ReelsPage(
+    item: T,
+    reelItem: ReelItem,
     state: ReelsPlayerState,
     isActivePage: Boolean,
     player: Player?,
     actions: ReelsPlayerActions,
     config: ReelsPlayerConfig,
     modifier: Modifier = Modifier,
-    overlay: @Composable BoxScope.(ReelItem, ReelsPlayerState, ReelsPlayerActions) -> Unit,
-    loadingContent: @Composable BoxScope.(ReelItem) -> Unit,
-    errorContent: @Composable BoxScope.(ReelItem, Throwable?, () -> Unit) -> Unit
+    overlay: @Composable BoxScope.(T, ReelsPlayerState, ReelsPlayerActions) -> Unit,
+    loadingContent: @Composable BoxScope.(T) -> Unit,
+    errorContent: @Composable BoxScope.(T, Throwable?, () -> Unit) -> Unit
 ) {
     Box(modifier.fillMaxSize().background(Color.Black)) {
         if (isActivePage) {
@@ -39,7 +40,7 @@ internal fun ReelsPage(
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            ReelsThumbnail(item = item)
+            ReelsThumbnail(item = reelItem)
         }
 
         if (isActivePage && (!state.isFirstFrameRendered || state.isLoading)) {

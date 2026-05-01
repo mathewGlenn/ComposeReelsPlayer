@@ -129,6 +129,40 @@ ReelsPlayer(
 )
 ```
 
+You can also keep your own item model and map only the media fields the player needs. The overlay receives your original type.
+
+```kotlin
+import com.glennmathew.reelsplayer.model.ReelsMediaSource
+
+data class FeedPost(
+    val postId: String,
+    val playbackUrl: String,
+    val thumbnailUrl: String?,
+    val authorName: String,
+    val caption: String,
+    val likes: Int
+)
+
+ReelsPlayer(
+    items = posts,
+    mediaSource = { post ->
+        ReelsMediaSource.Video(
+            id = post.postId,
+            videoUrl = post.playbackUrl,
+            thumbnailUrl = post.thumbnailUrl
+        )
+    },
+    overlay = { post, state, actions ->
+        Text(
+            text = "${post.authorName}: ${post.caption}",
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        )
+    }
+)
+```
+
 ## Configuration
 
 ```kotlin
@@ -216,7 +250,7 @@ Caching is enabled by default through `ReelsCacheConfig`. You can clear the shar
 ReelsPlayerCache.clear(context)
 ```
 
-Use stable `ReelItem.id` values or provide a custom `cacheKeyProvider` when video URLs contain expiring query parameters.
+Use stable `ReelItem.id` values, or stable `ReelsMediaSource.Video.id` values when using a custom item model. Provide a custom `cacheKeyProvider` when video URLs contain expiring query parameters.
 
 ## Analytics
 
@@ -247,5 +281,5 @@ Media3-supported sources are supported, including MP4, HLS `.m3u8`, and DASH `.m
 
 - The default overlay is intentionally minimal. Replace it with your product UI for likes, comments, sharing, captions, profile actions, and moderation states.
 - Preloading keeps a bounded set of muted prepared players nearby. Avoid large `aheadCount` or `behindCount` values on memory-constrained devices.
-- `ReelItem.headers` is passed into media requests, which is useful for authenticated or signed media endpoints.
+- `ReelItem.headers` and `ReelsMediaSource.Video.headers` are passed into media requests, which is useful for authenticated or signed media endpoints.
 - Subtitle metadata is modeled with `ReelSubtitle`, but subtitle styling and selection UI are left to the host app.
