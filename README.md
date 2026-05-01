@@ -18,31 +18,18 @@ A reusable Android library for building vertical short-form video feeds with Kot
 - Analytics callbacks for impressions, starts, pauses, completions, skips, buffering, watch time, mute events, and errors
 - Optional Media3 cache with configurable cache size and cache keys
 
-## Project Structure
-
-```text
-ComposeReelsPlayer/
-├── app/                    # Sample Android app
-└── compose-reels-player/   # Reusable library module
-```
-
 ## Requirements
 
 - Android min SDK 24+
 - Jetpack Compose
-- Kotlin 2.2.21
-- Android Gradle Plugin 9.0.1
-- Media3 1.5.1
+- Kotlin
+- Media3
 
-The library declares its Compose, Lifecycle, Coil, and Media3 dependencies through the Gradle version catalog in this repository.
+The library brings its Compose, Lifecycle, Coil, and Media3 dependencies transitively.
 
 ## Installation
 
-### From JitPack
-
-After this repository is pushed to GitHub and tagged, other projects can install the library through JitPack.
-
-Add JitPack to the consuming project's `settings.gradle.kts`:
+Add JitPack to your project's `settings.gradle.kts`:
 
 ```kotlin
 dependencyResolutionManagement {
@@ -55,15 +42,7 @@ dependencyResolutionManagement {
 }
 ```
 
-Then add the dependency:
-
-```kotlin
-dependencies {
-    implementation("com.github.mathewGlenn.ComposeReelsPlayer:compose-reels-player:0.1.0")
-}
-```
-
-For a Git tag named `v0.1.0`, use:
+Add the library dependency to your app module:
 
 ```kotlin
 dependencies {
@@ -71,33 +50,13 @@ dependencies {
 }
 ```
 
-### From This Repository
-
-For local development in this repository, add the module to your app:
-
-```kotlin
-dependencies {
-    implementation(project(":compose-reels-player"))
-}
-```
-
-If you copy the module into another project, include it in `settings.gradle.kts`:
-
-```kotlin
-include(":compose-reels-player")
-```
-
-Then add the dependency from your app module.
-
 ## Permissions
 
-Your app should declare internet access for remote videos:
+Declare internet access in your app for remote videos:
 
 ```xml
 <uses-permission android:name="android.permission.INTERNET" />
 ```
-
-The library module declares `ACCESS_NETWORK_STATE` so it can support network-aware preloading behavior.
 
 ## Basic Usage
 
@@ -280,41 +239,9 @@ ReelsPlayer(
 
 Events include impressions, playback starts, pauses, completions, replays, skips, watch time updates, watch thresholds, buffering, mute changes, and playback errors.
 
-## Run The Sample
+## Supported Formats
 
-From the repository root:
-
-```powershell
-.\gradlew.bat :app:installDebug
-```
-
-Or open the project in Android Studio and run the `app` configuration.
-
-## Build And Test
-
-```powershell
-.\gradlew.bat :compose-reels-player:assemble
-.\gradlew.bat :compose-reels-player:test
-```
-
-## Publish
-
-This project is configured with Gradle `maven-publish` for the `compose-reels-player` release variant.
-
-Publish to your local Maven cache:
-
-```powershell
-.\gradlew.bat :compose-reels-player:publishToMavenLocal
-```
-
-Create and push a GitHub release tag for JitPack:
-
-```powershell
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-Then open [JitPack for ComposeReelsPlayer](https://jitpack.io/#mathewGlenn/ComposeReelsPlayer) and request the `v0.1.0` build.
+Media3-supported sources are supported, including MP4, HLS `.m3u8`, and DASH `.mpd`.
 
 ## Notes
 

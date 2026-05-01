@@ -4,9 +4,7 @@
 
 ## Installation
 
-### From JitPack
-
-Add JitPack to the consuming project's `settings.gradle.kts`:
+Add JitPack to your project's `settings.gradle.kts`:
 
 ```kotlin
 dependencyResolutionManagement {
@@ -19,7 +17,7 @@ dependencyResolutionManagement {
 }
 ```
 
-Then add the dependency:
+Add the library dependency to your app module:
 
 ```kotlin
 dependencies {
@@ -27,17 +25,13 @@ dependencies {
 }
 ```
 
-### Local Module
+## Permissions
 
-Add the module to your app:
+Declare internet access in your app for remote videos:
 
-```kotlin
-dependencies {
-    implementation(project(":compose-reels-player"))
-}
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
 ```
-
-The module already declares Compose, Lifecycle, Coil, and Media3 dependencies.
 
 ## Basic Usage
 
