@@ -1,0 +1,143 @@
+---
+layout: default
+title: Home
+description: Build vertical reels, shorts, stories, and clip feeds with Kotlin, Jetpack Compose, and Media3.
+---
+
+<section class="hero">
+  <div class="hero-inner">
+    <div data-reveal>
+      <p class="eyebrow">Android library</p>
+      <h1>Compose Reels Player</h1>
+      <p class="hero-copy">A reusable vertical video feed for Kotlin apps, with one active Media3 player, custom overlays, lifecycle-aware playback, caching, and analytics hooks.</p>
+      <div class="actions">
+        <a class="button primary" href="#install">Install</a>
+        <a class="button" href="{{ site.github.repository_url }}">GitHub</a>
+      </div>
+    </div>
+
+    <div class="phone-stage" aria-hidden="true">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="reel-bars"><span></span><span></span><span></span></div>
+          <div class="play-signal"></div>
+          <div class="side-actions"><span></span><span></span><span></span></div>
+          <div class="caption">
+            <strong>@compose.reels</strong>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="section-inner split">
+    <div data-reveal>
+      <p class="eyebrow">What it handles</p>
+      <h2>Playback plumbing for short-form feeds.</h2>
+      <p class="lead">Keep your product UI in the overlay slot while the library owns the player lifecycle, gestures, preloading, errors, and progress affordances.</p>
+    </div>
+
+    <ul class="feature-list" data-reveal>
+      <li><strong>Vertical pager</strong>Full-screen reels, shorts, stories, and clip feeds in Jetpack Compose.</li>
+      <li><strong>Media3 playback</strong>MP4, HLS, and DASH support through ExoPlayer.</li>
+      <li><strong>Bounded preloading</strong>Prepare nearby muted players without letting memory run wild.</li>
+      <li><strong>Custom overlays</strong>Bring your own like, comment, share, profile, caption, or moderation UI.</li>
+      <li><strong>Gesture hooks</strong>Single tap, double tap, and long press behavior can plug into your app.</li>
+      <li><strong>Analytics events</strong>Track impressions, starts, pauses, completions, skips, buffering, watch time, mute changes, and errors.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section install" id="install">
+  <div class="section-inner split">
+    <div data-reveal>
+      <p class="eyebrow">Install</p>
+      <h2>Add it with JitPack.</h2>
+      <p class="lead">Requires Android min SDK 24+, Kotlin, Jetpack Compose, and Media3. Compose, Lifecycle, Coil, and Media3 dependencies are included transitively.</p>
+    </div>
+
+    <div class="code-stack" data-reveal>
+      <div class="code-block">
+        <div class="code-title"><span>settings.gradle.kts</span><span>repositories</span></div>
+<pre><code>dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://jitpack.io")
+    }
+}</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-title"><span>build.gradle.kts</span><span>dependency</span></div>
+<pre><code>dependencies {
+    implementation("com.github.mathewGlenn:ComposeReelsPlayer:0.1.2")
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="usage">
+  <div class="section-inner split">
+    <div data-reveal>
+      <p class="eyebrow">Usage</p>
+      <h2>Drop in the player, keep control of the feed.</h2>
+      <p class="lead">Use the controller for playback and navigation, then listen for current reel changes and analytics events from your host screen.</p>
+    </div>
+
+    <div class="code-block" data-reveal>
+      <div class="code-title"><span>ReelsScreen.kt</span><span>basic setup</span></div>
+<pre><code>@Composable
+fun ReelsScreen() {
+    val controller = rememberReelsPlayerController()
+
+    ReelsPlayer(
+        items = reels,
+        controller = controller,
+        onCurrentReelChanged = { index, item ->
+            println("Current reel: $index ${item.id}")
+        },
+        onAnalyticsEvent = { event ->
+            println("Reels analytics: $event")
+        },
+        onLoadMore = {
+            println("Load more reels")
+        }
+    )
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-inner">
+    <div class="workflow" data-reveal>
+      <article>
+        <span>01</span>
+        <h3>Map media</h3>
+        <p>Use <code>ReelItem</code> or map your own item model into <code>ReelsMediaSource.Video</code>.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>Own the overlay</h3>
+        <p>Add app-specific product actions while default playback controls stay library-owned.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>Tune behavior</h3>
+        <p>Configure autoplay, mute state, preloading, cache keys, load-more thresholds, and gestures.</p>
+      </article>
+    </div>
+
+    <p class="docs-link" data-reveal>
+      Read the full setup, overlay, cache, controller, and analytics examples in the
+      <a href="{{ site.github.repository_url }}#readme">project README</a>.
+    </p>
+  </div>
+</section>

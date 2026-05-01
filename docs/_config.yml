@@ -1,0 +1,15 @@
+title: Compose Reels Player
+description: A reusable Android library for vertical short-form video feeds with Kotlin, Jetpack Compose, and Media3 ExoPlayer.
+url: "https://mathewglenn.github.io"
+baseurl: "/ComposeReelsPlayer"
+repository: mathewGlenn/ComposeReelsPlayer
+
+github:
+  repository_url: "https://github.com/mathewGlenn/ComposeReelsPlayer"
+
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+
+exclude:
+  - README.md
